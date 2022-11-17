@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException,BackgroundTasks, Request, status
 from sqlmodel import Session, select
+from fastapi.middleware.cors import CORSMiddleware
 from . import models, file, auth2
 from app.db import get_session, run_async_upgrade
 from . import models, util
