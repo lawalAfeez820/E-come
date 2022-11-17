@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     database_url: str
     secret: str
     localhost: str
+    exp: int
 
     class Config:
         env_file= ".env"
