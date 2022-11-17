@@ -10,7 +10,7 @@ from pydantic import EmailStr
 
 class Base(SQLModel):
     username: str
-    email: str
+    email: EmailStr
     password: str
 
 class User(SQLModel, table = True):

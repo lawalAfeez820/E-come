@@ -2,7 +2,9 @@ from fastapi import Depends, FastAPI, HTTPException,BackgroundTasks, Request, st
 from sqlmodel import Session, select
 from fastapi.middleware.cors import CORSMiddleware
 from . import models, file, auth2
+from app.config import setting
 from app.db import get_session, run_async_upgrade
+#from app.db import get_session
 from . import models, util
 from pydantic import EmailStr
 import socket
@@ -44,6 +46,11 @@ async def home():
 
 @app.post("/users", response_model =Dict, status_code = 201)
 async def create_user(background_tasks: BackgroundTasks,user: models.UserCreate, db: Session = Depends(get_session)):
+
+    verify = list(user.dict().values())
+    
+    if not all(verify):
+        raise HTTPException(status_code=400, detail= f"One of the field is empty")
     user.email = user.email.lower()
     query = await db.execute(select(models.User).where(models.User.email == user.email))
     query = query.first()
@@ -66,7 +73,7 @@ async def create_user(background_tasks: BackgroundTasks,user: models.UserCreate,
     except socket.gaierror:
         raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
     # background task here
-    return {"Message": "Successful created, please check your mail for verification"}
+    return {"Message": f"Successful created, please check your mail for verification. The verification link will expire in {setting.exp} minutes time"}
 
 
 templates = Jinja2Templates(directory="templates")
@@ -96,10 +103,10 @@ async def login(detail: OAuth2PasswordRequestForm = Depends(), db: Session = Dep
     query: models.User = query.scalars().first()
 
     if not query:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail = f"Invalid credential")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = f"Invalid credential")
 
     if not util.verify_hash(detail.password, query.password):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail = f"Invalid credential")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = f"Invalid credential")
 
     if not query.is_verified:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Kindly verify your account")
@@ -117,11 +124,11 @@ async def get_new_password(background_tasks: BackgroundTasks, email: models.Forg
     query: models.User = query.scalars().first()
 
     if not query:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail = f"Invalid credential")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = f"Invalid credential")
     try:
         background_tasks.add_task(file.get_new_password, query.email)
     except socket.gaierror:
-        raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail = "Kindly check your internet connection")
 
     query.password = util.hash(file.password)
     db.add(query)
