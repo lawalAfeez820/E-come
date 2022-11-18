@@ -73,7 +73,7 @@ async def create_user(background_tasks: BackgroundTasks,user: models.UserCreate,
     except socket.gaierror:
         raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
     # background task here
-    return {"Message": f"Successful created, please check your mail for verification. The verification link will expire in {setting.exp} minutes time"}
+    return {"detail": f"Successful created, please check your mail for verification. The verification link will expire in {setting.exp} minutes time"}
 
 
 templates = Jinja2Templates(directory="templates")
@@ -134,7 +134,7 @@ async def get_new_password(background_tasks: BackgroundTasks, email: models.Forg
     db.add(query)
     await db.commit()
     await db.refresh(query)
-    return {"Message": "Check your email for the new password"}
+    return {"detail": "Check your email for the new password"}
     
 
 

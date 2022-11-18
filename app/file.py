@@ -54,7 +54,7 @@ def send_email(user =  models.User):
     msg['To'] = you
 
     # Create the body of the message (a plain-text and an HTML version).
-    text = text = """Thanks for choosing This E-commerce, please 
+    text = """Thanks for choosing This E-commerce, please 
                 click on the link below to verify your account\nVerify your email:\nhref="http://localhost:8000/verification/?token={token}"
                 \nIf you did not register for this E-commerce, 
                 please kindly ignore this email and nothing will happen. Thank"""
@@ -64,19 +64,30 @@ def send_email(user =  models.User):
         <head>
         </head>
         <body>
-            <div>
-                <p>Thanks for choosing This E-commerce, please 
-                click on the link below to verify your account</p>
-                <a
-                 href="{setting.localhost}/verification/?token={token}">
-                    Verify your email
-                <a>
-                <p style="margin-top:1rem;">If you did not register for this E-commerce, 
-                please kindly ignore this email and nothing will happen. Thanks<p>
-            </div>
+        
+        <div>
+                <p>
+          Thank you for choosing this e-commerce, please click on the link below
+          to verify your account. <br />
+          The link expires in five minutes
+        </p>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="{setting.localhost}/verification/?token={token}"
+        >
+          Click here to verify your account
+        </a>
+        <br/>
+        <small>
+          If you did not register on this platform, kindly disregard this
+          message
+        </small>
+      </div>
         </body>
         </html>
     """
+           
 
     # Record the MIME types of both parts - text/plain and text/html.
     part1 = MIMEText(text, 'plain')
