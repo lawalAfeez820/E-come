@@ -5,7 +5,7 @@ from app.db import get_session
 from sqlmodel import SQLModel, Session, select
 from pydantic import EmailStr
 from jose import jwt, JWTError
-import smtplib
+import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastapi import HTTPException, Depends, status
@@ -44,70 +44,56 @@ def send_email(user =  models.User):
 
     # me == my email address
     # you == recipient's email address
-    me = "lawalafeez820@gmail.com"
+    me = setting.email
     you = user.email
+    password =setting.email_password
    
     
-    msg = MIMEMultipart('alternative')
+
+
+
+    html = f"""\
+        <!DOCTYPE html>
+            <html>
+            <head>
+            </head>
+            <body>
+            
+            <div>
+            <p>
+            Thank you for choosing this e-commerce, please click on the link below
+            to verify your account. <br />
+            The link expires in five minutes
+            </p>
+            <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="{setting.localhost}/verification/?token={token}"
+            >
+            Click here to verify your account
+            </a>
+            <br/>
+            <small>
+            If you did not register on this platform, kindly disregard this
+            message
+            </small>
+        </div>
+            </body>
+            </html>
+        """
+    msg = MIMEMultipart()
+
     msg['Subject'] = "Verification mail"
     msg['From'] = me
     msg['To'] = you
 
-    # Create the body of the message (a plain-text and an HTML version).
-    text = """Thanks for choosing This E-commerce, please 
-                click on the link below to verify your account\nVerify your email:\nhref="http://localhost:8000/verification/?token={token}"
-                \nIf you did not register for this E-commerce, 
-                please kindly ignore this email and nothing will happen. Thank"""
-    html = f"""\
-    <!DOCTYPE html>
-        <html>
-        <head>
-        </head>
-        <body>
-        
-        <div>
-                <p>
-          Thank you for choosing this e-commerce, please click on the link below
-          to verify your account. <br />
-          The link expires in five minutes
-        </p>
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="{setting.localhost}/verification/?token={token}"
-        >
-          Click here to verify your account
-        </a>
-        <br/>
-        <small>
-          If you did not register on this platform, kindly disregard this
-          message
-        </small>
-      </div>
-        </body>
-        </html>
-    """
-           
+    msg.attach(MIMEText(html,"html"))
+    msg_string = msg.as_string()
 
-    # Record the MIME types of both parts - text/plain and text/html.
-    part1 = MIMEText(text, 'plain')
-    part2 = MIMEText(html, 'html')
-
-    # Attach parts into message container.
-    # According to RFC 2046, the last part of a multipart message, in this case
-    # the HTML message, is best and preferred.
-    msg.attach(part1)
-    msg.attach(part2)
-    # Send the message via local SMTP server.
-    mail = smtplib.SMTP_SSL('smtp.gmail.com')
-
-    mail.ehlo()
-
-
-
-    mail.login("lawalafeez820@gmail.com","ldmsdmnvecansbdq")
-    mail.sendmail(me, you, msg.as_string())
-    mail.quit()
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com",465, context=context) as server:
+        server.login(me, password)
+        server.sendmail(me, you, msg_string)
 
 
 def verify_token(token,CredentialException):
@@ -139,21 +125,12 @@ async def get_user(token):
 password = secrets.token_hex(8)
 def get_new_password(email: EmailStr):
 
-    # me == my email address
-    # you == recipient's email address
-    me = "lawalafeez820@gmail.com"
+    me = setting.email
     you = email
-
-    
+    password =setting.email_password
    
-    
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = "New Password Notification"
-    msg['From'] = me
-    msg['To'] = you
 
-    # Create the body of the message (a plain-text and an HTML version).
-    text = text = f"""<p>Your new password is {password}</p>"""
+
     html = f"""\
     <!DOCTYPE html>
         <html>
@@ -167,27 +144,19 @@ def get_new_password(email: EmailStr):
         </body>
         </html>
     """
+    msg = MIMEMultipart()
 
-    # Record the MIME types of both parts - text/plain and text/html.
-    part1 = MIMEText(text, 'plain')
-    part2 = MIMEText(html, 'html')
+    msg['Subject'] = "New Password Notification"
+    msg['From'] = me
+    msg['To'] = you
 
-    # Attach parts into message container.
-    # According to RFC 2046, the last part of a multipart message, in this case
-    # the HTML message, is best and preferred.
-    msg.attach(part1)
-    msg.attach(part2)
-    # Send the message via local SMTP server.
-    mail = smtplib.SMTP_SSL('smtp.gmail.com')
+    msg.attach(MIMEText(html,"html"))
+    msg_string = msg.as_string()
 
-    mail.ehlo()
-
-
-
-    mail.login("lawalafeez820@gmail.com","ldmsdmnvecansbdq")
-    mail.sendmail(me, you, msg.as_string())
-    mail.quit()
-    
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com",465, context=context) as server:
+        server.login(me, password)
+        server.sendmail(me, you, msg_string)
 
 
 

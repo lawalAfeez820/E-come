@@ -8,6 +8,7 @@ from app.db import get_session, run_async_upgrade
 from . import models, util
 from pydantic import EmailStr
 import socket
+import asyncio
 
 
 from fastapi import BackgroundTasks
@@ -39,6 +40,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def on_startup():
     await run_async_upgrade()
+
 
 @app.get("/")
 async def home():
