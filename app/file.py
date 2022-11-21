@@ -46,7 +46,7 @@ def send_email(user =  models.User):
     # you == recipient's email address
     me = setting.email
     you = user.email
-    _password =setting.email_password
+    password =setting.email_password
    
     
 
@@ -92,7 +92,7 @@ def send_email(user =  models.User):
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com",465, context=context) as server:
-        server.login(me, _password)
+        server.login(me, password)
         server.sendmail(me, you, msg_string)
 
 
@@ -127,7 +127,7 @@ def get_new_password(email: EmailStr):
 
     me = setting.email
     you = email
-    password =setting.email_password
+    _password =setting.email_password
    
 
 
@@ -155,7 +155,7 @@ def get_new_password(email: EmailStr):
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com",465, context=context) as server:
-        server.login(me, password)
+        server.login(me, _password)
         server.sendmail(me, you, msg_string)
 
 
