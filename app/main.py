@@ -75,7 +75,7 @@ async def create_user(background_tasks: BackgroundTasks,user: models.UserCreate,
     except socket.gaierror:
         raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
     # background task here
-    return {"detail": f"Successful created, please check your mail for verification. The verification link will expire in {setting.exp} minutes time"}
+    return {"detail": f"Created successfully, please check your mail for verification. The verification link will expire in {setting.exp} minutes time"}
 
 
 templates = Jinja2Templates(directory="templates")
