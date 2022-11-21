@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException,BackgroundTasks, Request, status
+from fastapi import Depends, FastAPI, HTTPException,BackgroundTasks, Request, status, Response
 from sqlmodel import Session, select
 from fastapi.middleware.cors import CORSMiddleware
 from . import models, file, auth2
@@ -137,6 +137,17 @@ async def get_new_password(background_tasks: BackgroundTasks, email: models.Forg
     await db.commit()
     await db.refresh(query)
     return {"detail": "Check your email for the new password"}
+
+@app.delete("/user/{email}", status_code = 204)
+async def delete(email: EmailStr, db: Session = Depends(get_session)):
+
+    query = await db.execute(select(models.User).where(models.User.email == email.email.lower()))
+    query: models.User = query.scalars().first()
+    if not query:
+        raise HTTPException(status_code= 404, detail =f"User with {email} doesn't exist")
+    await db.delete(query)
+    await db.commit()
+    return Response(status_code= status.HTTP_204_NO_CONTENT)
     
 
 
