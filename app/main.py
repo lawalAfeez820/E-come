@@ -141,7 +141,7 @@ async def get_new_password(background_tasks: BackgroundTasks, email: models.Forg
 @app.delete("/user/{email}", status_code = 204)
 async def delete(email: EmailStr, db: Session = Depends(get_session)):
 
-    query = await db.execute(select(models.User).where(models.User.email == email.email.lower()))
+    query = await db.execute(select(models.User).where(models.User.email == email.lower()))
     query: models.User = query.scalars().first()
     if not query:
         raise HTTPException(status_code= 404, detail =f"User with {email} doesn't exist")
