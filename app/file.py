@@ -63,7 +63,7 @@ def send_email(user =  models.User):
             <p>
             Thank you for choosing this e-commerce, please click on the link below
             to verify your account. <br />
-            The link expires in five minutes
+            The link expires in thirty minutes time
             </p>
             <a
             target="_blank"
