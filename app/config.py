@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic import BaseSettings, EmailStr
 
 class Settings(BaseSettings):
     expiry_time: int
@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     exp: int
     email: str
     email_password: str
+    admin_email: EmailStr
 
     class Config:
         env_file= ".env"

@@ -47,7 +47,7 @@ async def get_current_user(token: str = Depends(schema), db: Session = Depends(g
     
     token_data= verify_token(token, redentials_exception)
 
-    user = await db.get(models.Users,token_data.id)
+    user = await db.get(models.User,token_data.id)
 
     return user
 
