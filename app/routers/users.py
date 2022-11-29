@@ -2,7 +2,7 @@ from fastapi import BackgroundTasks, Depends, APIRouter, HTTPException, status
 import socket
 from sqlmodel import Session, select
 from typing import Dict
-from app import models, util, file
+from app import models, util, file, auth2
 from app.db import get_session
 from app.config import setting
 
@@ -60,3 +60,20 @@ async def get_new_password(background_tasks: BackgroundTasks, email: models.Forg
     await db.commit()
     await db.refresh(query)
     return {"detail": "Check your email for the new password"}
+
+@router.post("/users/updatepassword", response_model=models.PlainMessage)
+async def update_password(passwords: models.UpdatePassword, db:Session = Depends(get_session), user: models.User = Depends(auth2.get_current_user)):
+
+    query =await db.execute(select(models.User).where(models.User.email == user.email.lower()))
+    query: models.User = query.scalars().first()
+
+    if not util.verify_hash(passwords.old_password, query.password):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail = "Old password doesn't match")
+    passwords.new_password = util.hash(passwords.new_password) 
+    query.password = passwords.new_password
+    db.add(query)
+    await db.commit()
+    await db.refresh(query)
+    return models.PlainMessage(detail = f"Password has been reset")
+
+    

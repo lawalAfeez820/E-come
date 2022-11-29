@@ -70,6 +70,13 @@ class ProductReturn(ProductCreate):
     product_id: int
     created_at: datetime
 
+class UpdatePassword(SQLModel):
+    old_password: str
+    new_password: str
+
+class PlainMessage(SQLModel):
+    detail: str
+
 
 
 
