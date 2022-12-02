@@ -1,4 +1,4 @@
-.env
+.env*
 venv
 try.py
 __pycache__
