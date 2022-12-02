@@ -33,7 +33,7 @@ oauth.register(
 
 )
 
-@router.route('/login/google')
+@router.get('/login/google')
 async def login(request: Request):
     # absolute url for callback
     # we will define it below
