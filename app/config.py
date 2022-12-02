@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     email: str
     email_password: str
     admin_email: EmailStr
+    client_id: str
+    client_secret: str
 
     class Config:
         env_file= ".env"

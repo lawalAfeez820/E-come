@@ -11,7 +11,7 @@ router = APIRouter(
     tags= ["AUTHENTICATION"]
 )
 
-@router.post("/login")
+@router.post("/login", response_model=models.LoginReturn)
 async def login(detail: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_session)):
 
     query = await db.execute(select(models.User).where(models.User.email == detail.username.lower()))

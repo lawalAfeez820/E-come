@@ -7,8 +7,9 @@ from app.db import get_session, run_async_upgrade
 #from app.db import get_session
 from . import models, util
 from pydantic import EmailStr
+from starlette.middleware.sessions import SessionMiddleware
 
-from app.routers import users, login, products
+from app.routers import google, users, login, products
 
 
 
@@ -22,12 +23,12 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
 
-
+origins = ["*"]
 
 
 app = FastAPI()
 
-origins = ["*"]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,7 +37,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+app.add_middleware(SessionMiddleware, secret_key="test secret key")
 
 @app.on_event("startup")
 async def on_startup():
@@ -50,6 +51,7 @@ async def home():
 app.include_router(users.router)
 app.include_router(login.router)
 app.include_router(products.router)
+app.include_router(google.router)
 
 
 templates = Jinja2Templates(directory="templates")

@@ -51,3 +51,13 @@ async def get_current_user(token: str = Depends(schema), db: Session = Depends(g
 
     return user
 
+def get_access_token_for_google_login(payload: Dict):
+
+    expire= datetime.utcnow() + timedelta(minutes=EXPIRY_TIME)
+    payload.update({"exp":expire})
+
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+    return token
+
+
