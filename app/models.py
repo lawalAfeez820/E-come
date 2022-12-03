@@ -28,7 +28,7 @@ class UserCreate(Base):
     confirm_password: str
 
 class TokenData(SQLModel):
-    id: int
+    email: EmailStr
 
 class LoginReturn(SQLModel):
 

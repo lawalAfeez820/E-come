@@ -26,7 +26,7 @@ async def login(detail: OAuth2PasswordRequestForm = Depends(), db: Session = Dep
     if not query.is_verified:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Kindly verify your account")
 
-    token = auth2.get_access_token({"id": query.id})
+    token = auth2.get_access_token({"email": query.email})
 
     token = models.LoginReturn(access_token = token, token_type = "bearer")
 
