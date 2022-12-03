@@ -39,9 +39,9 @@ app.add_middleware(
 )
 app.add_middleware(SessionMiddleware, secret_key="test secret key")
 
-@app.on_event("startup")
+"""@app.on_event("startup")
 async def on_startup():
-    await run_async_upgrade()
+    await run_async_upgrade()"""
 
 
 @app.get("/")
