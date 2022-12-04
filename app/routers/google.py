@@ -39,7 +39,10 @@ async def login(request: Request):
     # absolute url for callback
     # we will define it below
     redirect_uri = request.url_for('auth')
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    try:
+        return await oauth.google.authorize_redirect(request, redirect_uri)
+    except:
+        raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
 
 
 
@@ -53,26 +56,29 @@ async def auth(background_tasks: BackgroundTasks,request: Request,  db: Session=
             detail='Could not validate credentials',
             headers={'WWW-Authenticate': 'Bearer'},
         )
-    user_data = await oauth.google.parse_id_token(request, access_token)
+    try:
+        user_data = await oauth.google.parse_id_token(request, access_token)
+    except:
+        raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
     # TODO: validate email in our database and generate JWT token
     user_email= user_data["email"]
     query = await db.execute(select(models.User).where(models.User.email == user_email))
     query= query.scalars().first()
     if not query:
         user = {"username":user_data['given_name'], "password":user_data['name'], 
-        "email": user_data['email']}
+        "email": user_data['email'], "is_verified": True}
         user["password"] = util.hash(user["password"])
+        
         user = models.Base(**user)
+        
         user = models.User.from_orm(user)
         db.add(user)
         await db.commit()
-        await db.refresh(user)
-        try:
-            background_tasks.add_task(file.send_email, user)
-        except socket.gaierror:
-            raise HTTPException(status_code=status.HTTP_408_REQUEST_TIMEOUT, detail = "Kindly check your internet connection")
-        
-        
+        if user and not user.is_verified:
+            user.is_verified = True
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
     token = auth2.get_access_token({"email": user_data["email"]})
     # TODO: return the JWT token to the user so it can make requests to our /api endpoint
     return models.LoginReturn(access_token = token, token_type = "bearer")

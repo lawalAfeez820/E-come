@@ -70,7 +70,6 @@ async def email_verification(request: Request, token: str, db: Session = Depends
         db.add(user)
         await db.commit()
         await db.refresh(user)
-        print(user)
         return templates.TemplateResponse("verification.html", 
                                 {"request": request, "username": user.username})
 
