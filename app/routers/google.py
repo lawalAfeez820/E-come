@@ -66,7 +66,7 @@ async def auth(background_tasks: BackgroundTasks,request: Request,  db: Session=
     query= query.scalars().first()
     if not query:
         user = {"username":user_data['given_name'], "password":user_data['name'], 
-        "email": user_data['email'], "is_verified": True}
+        "email": user_data['email']}
         user["password"] = util.hash(user["password"])
         
         user = models.Base(**user)
