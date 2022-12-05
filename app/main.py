@@ -39,9 +39,9 @@ app.add_middleware(
 )
 app.add_middleware(SessionMiddleware, secret_key="test secret key")
 
-@app.on_event("startup")
+"""@app.on_event("startup")
 async def on_startup():
-    await run_async_upgrade()
+    await run_async_upgrade()"""
 
 
 @app.get("/")
@@ -60,8 +60,8 @@ templates = Jinja2Templates(directory="templates")
 async def email_verification(request: Request, token: str, db: Session = Depends(get_session)): 
     
     token_data = await file.get_user(token)
-    print(token_data.id)
-    user: models.User = await db.execute(select(models.User).where(models.User.id == token_data.id))
+    
+    user: models.User = await db.execute(select(models.User).where(models.User.email == token_data.email))
     user: models.User= user.scalars().first()
     
     

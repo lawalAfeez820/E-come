@@ -32,7 +32,7 @@ EXP = setting.expiry_time
 # Create message container - the correct MIME type is multipart/alternative.
 def send_email(user =  models.User):
     token_data = {
-            "id": user.id
+            "email": user.email
         }
 
     expire = datetime.utcnow() + timedelta(minutes=EXP)
@@ -100,11 +100,11 @@ def verify_token(token,CredentialException):
     try:
         payload = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
 
-        id: str = payload.get("id")
+        email: str = payload.get("email")
 
-        if not id:
+        if not email:
             raise CredentialException
-        token_data = models.TokenData(id=id)
+        token_data = models.TokenData(email=email)
     except JWTError as e:
         raise CredentialException
     return token_data
