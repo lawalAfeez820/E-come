@@ -48,7 +48,7 @@ async def login(request: Request):
 
 
 @router.get('/auth', response_class= RedirectResponse)
-async def auth(response:Response, request: Request,  db: Session= Depends(get_session) , Authorize: AuthJWT = Depends()):
+async def auth(response:Response, request: Request,  db: Session= Depends(get_session)):
     try:
         access_token = await oauth.google.authorize_access_token(request)
     except OAuthError:
