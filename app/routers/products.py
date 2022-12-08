@@ -36,7 +36,7 @@ async def get_all_product(user: models.User = Depends(auth2.get_current_user), d
     return products
 
 @router.get("/products/{category}", response_model= List[models.ProductReturn])
-async def get_product_by_category(category: str, user: models.User = Depends(auth2.get_current_user), db: Session = Depends(get_session)):
+async def get_product_by_category(category: str,user: models.User = Depends(auth2.get_current_user) , db: Session = Depends(get_session)):
 
     categories = ["phones", "tablets", "laptops", "monitors", "accessories"]
     category = category.lower()
@@ -47,3 +47,13 @@ async def get_product_by_category(category: str, user: models.User = Depends(aut
             raise HTTPException(status_code= 204, detail= f"We don't have any product base on this category yet, Please check back later")
         return query
     raise HTTPException(status_code= 204, detail= f"We don't have any product base on this category yet, Please check back later")
+
+@router.get("/product/{id}", response_model= models.ProductReturn)
+async def get_product(id: int, db: Session = Depends(get_session),user: models.User= Depends(auth2.get_current_user)):
+    product = await db.execute((select(models.Product)).where(models.Product.product_id == id))
+    product: None|models.Product = product.scalars().first()
+
+    if not product:
+        raise HTTPException(status_code= 204, detail= f" No product with id {id}")
+
+    return product
