@@ -30,13 +30,22 @@ app = FastAPI()
 
 
 
-app.add_middleware(
+"""app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)"""
+
+app.add_middleware(
+CORSMiddleware,
+allow_origins=origins,
+allow_credentials=True,
+allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
+allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
 )
+
 app.add_middleware(SessionMiddleware, secret_key="test secret key")
 
 """@app.on_event("startup")

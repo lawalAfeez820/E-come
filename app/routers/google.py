@@ -1,5 +1,5 @@
-from fastapi import  Depends, APIRouter, HTTPException, status, Request, BackgroundTasks
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import  Depends, APIRouter, HTTPException, status, Request, BackgroundTasks, Response, Depends
+from fastapi.responses import RedirectResponse, JSONResponse,PlainTextResponse
 from authlib.integrations.starlette_client import OAuthError
 
 from sqlmodel import Session, select
@@ -12,6 +12,7 @@ from starlette.config import Config
 import requests as re
 import socket
 from pydantic import EmailStr
+
 
 
 router = APIRouter(
@@ -46,8 +47,8 @@ async def login(request: Request):
 
 
 
-@router.get('/auth', response_model=models.LoginReturn)
-async def auth(background_tasks: BackgroundTasks,request: Request,  db: Session= Depends(get_session)):
+@router.get('/auth', response_class= RedirectResponse)
+async def auth(response:Response, request: Request,  db: Session= Depends(get_session) , Authorize: AuthJWT = Depends()):
     try:
         access_token = await oauth.google.authorize_access_token(request)
     except OAuthError:
@@ -80,10 +81,12 @@ async def auth(background_tasks: BackgroundTasks,request: Request,  db: Session=
             await db.commit()
             await db.refresh(user)
     token = auth2.get_access_token({"email": user_data["email"]})
+    response = RedirectResponse(url = "https://project-frontend-woad.vercel.app")
+    response.set_cookie(key= "access_token", value= f"Bearer {token}")
     # TODO: return the JWT token to the user so it can make requests to our /api endpoint
-    return models.LoginReturn(access_token = token, token_type = "bearer")
+    return response
 
 @router.get('/logout')
 def logout(request: Request):
     request.session.pop('user', None) 
-    return RedirectResponse(url='/')
+    return RedirectResponse(url='')
