@@ -13,17 +13,7 @@ router = APIRouter(
     tags= ["PRODUCTS"]
 )
 
-@router.post("/products/{email}", status_code= 201, response_model= models.ProductReturn)
-async def create_product(email: Optional[EmailStr], product: models.ProductCreate, db: Session = Depends(get_session)):
 
-    if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
-    product = models.Product.from_orm(product)
-    product.category = product.category.lower()
-    db.add(product)
-    await db.commit()
-    await db.refresh(product)
-    return product 
 
 @router.get("/products",response_model=List[models.ProductReturn])
 async def get_all_product(user: models.User = Depends(auth2.get_current_user), db: Session = Depends(get_session)):

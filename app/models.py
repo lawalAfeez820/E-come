@@ -22,7 +22,7 @@ class User(SQLModel, table = True):
     is_verified: Optional[bool] = Field(sa_column= Column(Boolean, server_default= "false"))
     created_at: Optional[datetime] = Field(sa_column= Column(TIMESTAMP(timezone=True), 
     server_default=text("now()")))
-    products: List["Product"] = Relationship(back_populates="owner")
+    #products: List["Product"] = Relationship(back_populates="owner")
 
 class UserCreate(Base):
     confirm_password: str
@@ -55,6 +55,9 @@ class ProductCreate(SQLModel):
     flash_sales: bool = False
     discount: Optional[float] = None
     image: str
+    image1: Optional[str] = None
+    image2: Optional[str] = None
+    description: Optional[str] = None
     quantity: int
 
 
@@ -64,7 +67,7 @@ class Product(ProductCreate, table= True):
     server_default=text("now()")))
     user_id: int = Field(sa_column= Column(Integer, 
     ForeignKey("user.id", ondelete="CASCADE"), nullable= True), default = None)
-    owner: Optional[User] = Relationship(back_populates="products")
+    
 
 class ProductReturn(ProductCreate):
     product_id: int
@@ -76,6 +79,35 @@ class UpdatePassword(SQLModel):
 
 class PlainMessage(SQLModel):
     detail: str
+
+class Cart(ProductCreate, table = True):
+    cart_id: Optional[int] = Field(default= None, primary_key= True)
+    user_email: EmailStr 
+    created_at: Optional[datetime] = Field(sa_column= Column(TIMESTAMP(timezone=True), 
+    server_default=text("now()")))
+    product_id: int
+    quantity: int
+
+class Quantity(SQLModel):
+    quantity: int
+
+class ProductUpdate(SQLModel):
+    category: Optional[str] = None
+    product_name: Optional[str] = None
+    price: Optional[float] = None
+    new_arrival: Optional[bool] = None
+    flash_sales: Optional[bool] = None
+    discount: Optional[float] = None
+    image: Optional[str] = None
+    image1: Optional[str] = None
+    image2: Optional[str] = None
+    description: Optional[str] = None
+    quantity: Optional[int] = None
+    
+
+
+
+
 
 
 

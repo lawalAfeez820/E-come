@@ -9,7 +9,7 @@ from . import models, util
 from pydantic import EmailStr
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.routers import google, users, login, products
+from app.routers import google, users, login, products, cart, creator
 
 
 
@@ -30,27 +30,27 @@ app = FastAPI()
 
 
 
-"""app.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)"""
+)
 
-app.add_middleware(
+"""app.add_middleware(
 CORSMiddleware,
 allow_origins=origins,
 allow_credentials=True,
 allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
 allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
-)
+)"""
 
 app.add_middleware(SessionMiddleware, secret_key="test secret key")
 
-"""@app.on_event("startup")
+@app.on_event("startup")
 async def on_startup():
-    await run_async_upgrade()"""
+    await run_async_upgrade()
 
 
 @app.get("/")
@@ -61,6 +61,8 @@ app.include_router(users.router)
 app.include_router(login.router)
 app.include_router(products.router)
 app.include_router(google.router)
+app.include_router(creator.router)
+app.include_router(cart.router)
 
 
 templates = Jinja2Templates(directory="templates")

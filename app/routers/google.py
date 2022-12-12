@@ -82,7 +82,7 @@ async def auth(response:Response, request: Request,  db: Session= Depends(get_se
             await db.refresh(user)
     token = auth2.get_access_token({"email": user_data["email"]})
     response = RedirectResponse(url = "https://project-frontend-woad.vercel.app")
-    response.set_cookie(key= "access_token", value= f"Bearer {token}")
+    response.set_cookie(key= "access_token", value= f"Bearer {token}", secure=True, samesite='none')
     # TODO: return the JWT token to the user so it can make requests to our /api endpoint
     return response
 
@@ -90,3 +90,4 @@ async def auth(response:Response, request: Request,  db: Session= Depends(get_se
 def logout(request: Request):
     request.session.pop('user', None) 
     return RedirectResponse(url='')
+
