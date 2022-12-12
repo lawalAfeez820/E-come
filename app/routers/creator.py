@@ -17,7 +17,7 @@ router = APIRouter(
 async def create_product(email: Optional[EmailStr], product: models.ProductCreate, db: Session = Depends(get_session)):
 
     if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"you are not allow for perform this task")
     product = models.Product.from_orm(product)
     product.category = product.category.lower()
     db.add(product)
@@ -29,7 +29,7 @@ async def create_product(email: Optional[EmailStr], product: models.ProductCreat
 async def update_product(email: Optional[EmailStr], id: int, product: models.ProductUpdate, db: Session = Depends(get_session)):
 
     if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"you are not allow for perform this task")
 
     products = await db.execute((select(models.Product)).where(models.Product.product_id == id))
     products : models.Product = products.scalars().first()
@@ -48,7 +48,7 @@ async def update_product(email: Optional[EmailStr], id: int, product: models.Pro
 async def delete_product(email: Optional[EmailStr], id: int,  db: Session = Depends(get_session)):
 
     if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"you are not allow for perform this task")
 
     products = await db.execute((select(models.Product)).where(models.Product.product_id == id))
     products : models.Product = products.scalars().first()
@@ -58,11 +58,24 @@ async def delete_product(email: Optional[EmailStr], id: int,  db: Session = Depe
     await db.commit()
     return Response(status_code= status.HTTP_204_NO_CONTENT)
 
-@router.get("/products/{email}", status_code= 201, response_model= models.ProductReturn)
+
+@router.get("/products/all/{email}", status_code= 201, response_model= List[models.ProductReturn])
+async def get_all_products(email: Optional[EmailStr], db: Session = Depends(get_session)):
+
+    if email != setting.admin_email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"you are not allow for perform this task")
+
+    products = await db.execute((select(models.Product)))
+    products : List[models.Product] = products.scalars().all()
+    if not products:
+            raise HTTPException(status_code=404, detail="product not found")
+    return products
+
+@router.get("/products/{email}/{id}", status_code= 201, response_model= models.ProductReturn)
 async def get_product(email: Optional[EmailStr], id: int, db: Session = Depends(get_session)):
 
     if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"you are not allow for perform this task")
 
     products = await db.execute((select(models.Product)).where(models.Product.product_id == id))
     products : models.Product = products.scalars().first()
@@ -71,27 +84,16 @@ async def get_product(email: Optional[EmailStr], id: int, db: Session = Depends(
     return products
 
 
-@router.get("/products/{email}", status_code= 201, response_model= List[models.ProductReturn])
-async def get_all_products(email: Optional[EmailStr], db: Session = Depends(get_session)):
+
+
+
+@router.get("/product/all/{email}", status_code= 201, response_model= List[models.ProductReturn])
+async def get_products_by_categories(email: Optional[EmailStr], category: str, db: Session = Depends(get_session)):
 
     if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"you are not allow for perform this task")
 
-    products = await db.execute((select(models.Product)))
-    products : List[models.Product] = products.scalars().all()
-    if not products:
-            raise HTTPException(status_code=404, detail="product not found")
-    return products
-
-
-
-@router.get("/products/{email}", status_code= 201, response_model= List[models.ProductReturn])
-async def update_product(email: Optional[EmailStr], category: str, db: Session = Depends(get_session)):
-
-    if email != setting.admin_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail= f"your are not allow for perform this task")
-
-    categories = ["phones", "tablets", "laptops", "monitors", "accessories"]
+    categories = ["phones", "tablets", "laptops", "monitors", "accessories", "string"]
     category = category.lower()
     if category in categories:
         query = await db.execute(select(models.Product).where(models.Product.category == category))
