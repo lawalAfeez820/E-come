@@ -5,6 +5,7 @@ from typing import Dict, Optional, List
 from app import models, auth2
 from app.db import get_session
 from app.config import setting
+from sqlalchemy import func
 
 from pydantic import EmailStr
 
@@ -47,3 +48,15 @@ async def get_product(id: int, db: Session = Depends(get_session),user: models.U
         raise HTTPException(status_code= 204, detail= f" No product with id {id}")
 
     return product
+
+@router.get("/related/{id}", response_model= List[models.ProductReturn])
+
+async def get_related_product(id: int, db: Session = Depends(get_session), user: models.User= Depends(auth2.get_current_user)):
+    product = await db.execute((select(models.Product)).where(models.Product.product_id == id))
+    product: None|models.Product = product.scalars().first()
+
+    related_product = await db.execute((select(models.Product)).where(models.Product.category== product.category).order_by(func.random()).limit(3))
+    related_product: None| List[models.Product] = related_product.scalars().all()
+
+    return related_product
+
