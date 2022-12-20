@@ -1,7 +1,7 @@
 # E-COMMERCE API's WITH FASTAPI
 
 ### About this project
-An E-COMMERCE App built with python fastapi. This feature of the app is listed below
+An E-COMMERCE App built with python fastapi. The feature of the app is listed below
 
 - Registration with a valid email(for verifcation purpose) and Login of registered users
 - User can add item to cart and pay later
