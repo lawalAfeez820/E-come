@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     admin_email: EmailStr
     client_id: str
     client_secret: str
+    paystack_public_key: str
+    paystack_secret_key: str
 
     class Config:
         env_file= ".env"

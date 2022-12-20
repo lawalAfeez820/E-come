@@ -47,7 +47,7 @@ async def login(request: Request):
 
 
 
-@router.get('/auth', response_class= RedirectResponse)
+@router.get('/auth',status_code= 201)
 async def auth(response:Response, request: Request,  db: Session= Depends(get_session)):
     try:
         access_token = await oauth.google.authorize_access_token(request)
@@ -82,10 +82,12 @@ async def auth(response:Response, request: Request,  db: Session= Depends(get_se
             await db.refresh(user)
     token = auth2.get_access_token({"email": user_data["email"]})
     #"https://project-frontend-woad.vercel.app"
-    response = RedirectResponse(url = "https://project-frontend-woad.vercel.app")
-    response.set_cookie(key= "access_token", value= f"Bearer {token}", secure=True, samesite='none', domain= "https://project-frontend-woad.vercel.app")
-    # TODO: return the JWT token to the user so it can make requests to our /api endpoint
-    return response
+    #response = RedirectResponse(url = "https://project-frontend-woad.vercel.app")
+    #response.set_cookie(key= "ac__token", value= f"Bearer {token}", secure=True, samesite='none', domain= "localhost")
+    #response.set_cookie(key='token_name', value=f"Bearer {token}", httponly=True, secure=True, samesite='none', domain= "localhost")
+    # TODO: return the JWT token to the user so it can make requests to our /api endpoint"
+    #return response
+    return token
 
 @router.get('/logout')
 def logout(request: Request):

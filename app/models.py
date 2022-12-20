@@ -7,6 +7,8 @@ from datetime import datetime
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from pydantic import EmailStr
+from pydantic.types import PositiveFloat
+from app.paystack import PayStack
 
 class Base(SQLModel):
     username: str
@@ -103,6 +105,43 @@ class ProductUpdate(SQLModel):
     image2: Optional[str] = None
     description: Optional[str] = None
     quantity: Optional[int] = None
+
+
+
+
+class Payment(SQLModel):
+    
+    user_email: EmailStr 
+    amount: PositiveFloat
+    ref: str 
+
+
+    def verify_payment(self):
+        paystack = PayStack()
+        status, result = paystack.verify_payment(self.ref, self.amount)
+        if status:
+            print(status)
+          
+            if result["amount"]  == self.amount:
+                print(result["amount"] / 100 )
+                print(self.amount)
+                return True
+        return False
+
+class Payment2(Payment):
+
+    id: int
+    quantity: int
+    
+        
+
+class Receipt(SQLModel):
+    quantity: int
+    product_name: str
+    price: float
+    discount: Optional[int] = 0
+    category: str
+ 
     
 
 

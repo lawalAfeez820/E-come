@@ -102,3 +102,5 @@ async def get_products_by_categories(email: Optional[EmailStr], category: str, d
             raise HTTPException(status_code= 204, detail= f"We don't have any product base on this category yet, Please check back later")
         return query
     raise HTTPException(status_code= 204, detail= f"We don't have any product base on this category yet, Please check back later")
+
+

@@ -8,8 +8,11 @@ from app.db import get_session, run_async_upgrade
 from . import models, util
 from pydantic import EmailStr
 from starlette.middleware.sessions import SessionMiddleware
+import secrets
+from app.logic.logic import PaymentSession
 
-from app.routers import google, users, login, products, cart, creator
+from app.routers import google, users, login, products, cart, creator, payments
+
 
 
 
@@ -26,25 +29,27 @@ from fastapi.responses import HTMLResponse
 origins = ["*"]
 
 
+
+
 app = FastAPI()
 
 
 
-app.add_middleware(
+"""app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+)"""
 
-"""app.add_middleware(
+app.add_middleware(
 CORSMiddleware,
 allow_origins=origins,
 allow_credentials=True,
 allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
 allow_headers=["Access-Control-Allow-Headers", 'Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
-)"""
+)
 
 app.add_middleware(SessionMiddleware, secret_key="test secret key")
 
@@ -63,6 +68,7 @@ app.include_router(products.router)
 app.include_router(google.router)
 app.include_router(creator.router)
 app.include_router(cart.router)
+app.include_router(payments.router)
 
 
 templates = Jinja2Templates(directory="templates")
@@ -84,6 +90,35 @@ async def email_verification(request: Request, token: str, db: Session = Depends
         return templates.TemplateResponse("verification.html", 
                                 {"request": request, "username": user.username})
 
+
+@app.get("/payment/all")
+async def payment_cart(request: Request,  user: models.User = Depends(auth2.get_current_user),  db: Session = Depends(get_session)):
+
+   
+    
+
+    Total, products= await PaymentSession.total(email= user.email, db= db)
+
+    payment = models.Payment(user_email= user.email, amount= Total, ref= secrets.token_urlsafe(50))
+
+    return templates.TemplateResponse("make_cart_payment.html", 
+                                {"request": request, "payment": payment, "paystack_public_key": setting.paystack_public_key})
+
+@app.get("/payment/now/{id}")
+async def pay_now(id: int, request: Request, quantity: int, user: models.User = Depends(auth2.get_current_user), db: Session = Depends(get_session)):
+
+    
+
+    Total, products= await PaymentSession.buy_directly(id=id, quantity= quantity, db= db)
+
+
+    payment = models.Payment2(id=id, quantity= quantity, user_email=user.email, amount= Total, ref= secrets.token_urlsafe(50))
+
+    return templates.TemplateResponse("make_payment.html",
+                                {"request": request, "payment": payment, "paystack_public_key": setting.paystack_public_key})
+
+
+    
 
 
 @app.delete("/user/{email}", status_code = 204)
