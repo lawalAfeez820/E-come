@@ -46,7 +46,7 @@ async def verify(ref: str, id: int, email:EmailStr, quantity: int, amount:float,
             db.add(query2)
             await db.commit()
             await db.refresh(query2)
-            return RedirectResponse(url='/')
+            return RedirectResponse(url='/', status_code=204)
     return JSONResponse({"detail": "Unsuccessful Transaction"})
 
 @router.get("/{ref}/{amount}/{email}")
@@ -64,7 +64,7 @@ async def verify_cart(ref: str, email: EmailStr, amount:float, db: Session = Dep
             db.add(query2)
             await db.delete(product)
         await db.commit()
-        return RedirectResponse(url='/')
+        return RedirectResponse(url='/', status_code=204)
     return JSONResponse({"detail": "Unsuccessful Transaction"})
 
 
